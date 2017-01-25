@@ -1,2 +1,2 @@
 # go-fuzzywuzzy
-Port of SeatGeek's Fuzzy Wuzzy
+Work in progress
