@@ -1,5 +1,33 @@
 package fuzzywuzzy
 
+type levMatchingBlock struct {
+	spos   int // source block pos
+	dpos   int // destination block pos
+	length int
+}
+
+type levEditType int
+
+const (
+	levEditKeep levEditType = iota
+	levEditReplace
+	levEditInsert
+	levEditDelete
+	levEditLast
+)
+
+type levEditOp struct {
+	editType levEditType
+	spos     int
+	dpos     int
+}
+
+type levOpCode struct {
+	editType   levEditType
+	sbeg, send int
+	dbeg, dend int
+}
+
 func Ratio(s1 string, s2 string) float64 {
 	lenSum := len(s1) + len(s2)
 	editDistance := LevEditDistance(s1, s2, 1)
