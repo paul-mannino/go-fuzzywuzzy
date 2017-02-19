@@ -98,6 +98,7 @@ func findEditOpsHelper(chrs1 []rune, len1 int, chrs2 []rune, len2 int) []levEdit
 			p++
 		}
 	}
+
 	return editOpsFromCostMatrix(len1, chrs1, p1, len1o, len2, chrs2, p2, len2o, matrix)
 }
 
@@ -109,66 +110,60 @@ func editOpsFromCostMatrix(len1 int, chrs1 []rune, p1, o1 int, len2 int, chrs2 [
 	ptr := len1*len2 - 1
 
 	for i > 0 || j > 0 {
-		if dir < 0 && j != 0 && matrix[ptr] == matrix[ptr-len2]+1 {
+		if dir < 0 && j > 0 && matrix[ptr] == matrix[ptr-1]+1 {
 			pos--
 			j--
 			ops[pos] = levEditOp{spos: i + o1, dpos: j + o2, editType: levEditInsert}
 			ptr--
-
 			continue
 		}
 
-		if dir > 0 && i != 0 && matrix[ptr] == matrix[ptr-len2-1] &&
-			chrs1[p1+i-1] == chrs2[p2+j-1] {
+		if dir > 0 && i > 0 && matrix[ptr] == matrix[ptr-len2]+1 {
 			pos--
 			i--
 			ops[pos] = levEditOp{spos: i + o1, dpos: j + o2, editType: levEditDelete}
 			ptr -= len2
-
 			continue
 		}
 
-		if i != 0 && j != 0 && matrix[ptr] == matrix[ptr-len2-1] &&
+		if i > 0 && j > 0 && matrix[ptr] == matrix[ptr-len2-1] &&
 			chrs1[p1+i-1] == chrs2[p2+j-1] {
 			i--
 			j--
 			ptr -= len2 + 1
 			dir = 0
-
 			continue
 		}
 
-		if i != 0 && j != 0 && matrix[ptr] == matrix[ptr-len2-1]+1 {
+		if i > 0 && j > 0 && matrix[ptr] == matrix[ptr-len2-1]+1 {
 			pos--
 			i--
 			j--
 			ops[pos] = levEditOp{spos: i + o1, dpos: j + o2, editType: levEditReplace}
 			ptr -= len2 + 1
 			dir = 0
-
 			continue
 		}
 
-		if dir == 0 && j != 0 && matrix[ptr] == matrix[ptr-1]+1 {
+		if dir == 0 && j > 0 && matrix[ptr] == matrix[ptr-1]+1 {
 			pos--
 			j--
 			ops[pos] = levEditOp{spos: i + o1, dpos: j + o2, editType: levEditInsert}
 			ptr--
 			dir = -1
-
 			continue
 		}
 
-		if dir == 0 && i != 0 && matrix[ptr] == matrix[ptr-len2]+1 {
+		if dir == 0 && i > 0 && matrix[ptr] == matrix[ptr-len2]+1 {
 			pos--
 			i--
 			ops[pos] = levEditOp{spos: i + o1, dpos: j + o2, editType: levEditDelete}
 			ptr -= len2
 			dir = 1
-
 			continue
 		}
 	}
+
 	return ops
 }
 
@@ -200,20 +195,20 @@ func editOpsToOpCodes(ops []levEditOp, len1, len2 int) []levOpCode {
 		switch editType {
 		case levEditReplace:
 			// emulate do...while loop
-			for ok := true; ok; ok = shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				dpos++
 				i--
 				opIdx++
 			}
 		case levEditDelete:
-			for ok := true; ok; ok = shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				i--
 				opIdx++
 			}
 		case levEditInsert:
-			for ok := true; ok; ok = shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				dpos++
 				i--
 				opIdx++
@@ -258,20 +253,20 @@ func editOpsToOpCodes(ops []levEditOp, len1, len2 int) []levOpCode {
 
 		switch editType {
 		case levEditReplace:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				dpos++
 				i--
 				opIdx++
 			}
 		case levEditDelete:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				i--
 				opIdx++
 			}
 		case levEditInsert:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				dpos++
 				i--
 				opIdx++
@@ -298,14 +293,15 @@ func editOpsToOpCodes(ops []levEditOp, len1, len2 int) []levOpCode {
 }
 
 // emulate do...while loop
-func shouldContinue(i int, editOp levEditOp, editType levEditType, spos, dpos int) bool {
-	return i > 0 && editOp.editType == editType &&
-		editOp.dpos == dpos && editOp.spos == spos
+func shouldContinue(i int, editOps []levEditOp, opIdx int, editType levEditType, spos, dpos int) bool {
+	return i > 0 && editOps[opIdx].editType == editType &&
+		editOps[opIdx].dpos == dpos && editOps[opIdx].spos == spos
 }
 
 func getMatchingBlocks(s1, s2 string) []levMatchingBlock {
 	chrs1, chrs2 := []rune(s1), []rune(s2)
 	len1, len2 := len(chrs1), len(chrs2)
+
 	return getMatchingBlocksHelper(len1, len2, findEditOpsHelper(chrs1, len1, chrs2, len2))
 }
 
@@ -337,20 +333,20 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 
 		switch editType {
 		case levEditReplace:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				dpos++
 				i--
 				opIdx++
 			}
 		case levEditDelete:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				i--
 				opIdx++
 			}
 		case levEditInsert:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				dpos++
 				i--
 				opIdx++
@@ -367,7 +363,7 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 	opIdx = 0
 	spos, dpos = 0, 0
 	blockIdx := 0
-
+	editType = levEditKeep
 	for i := n; i > 0; {
 		for ops[opIdx].editType == levEditKeep {
 			i--
@@ -390,34 +386,31 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 		}
 
 		editType = ops[opIdx].editType
-
 		switch editType {
 		case levEditReplace:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				dpos++
 				i--
 				opIdx++
 			}
 		case levEditDelete:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				i--
 				opIdx++
 			}
 		case levEditInsert:
-			for ok := true; ok; shouldContinue(i, ops[opIdx], editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				dpos++
 				i--
 				opIdx++
 			}
 		}
 	}
-
 	if spos < len1 || dpos < len2 {
-		matchingBlocks[blockIdx].spos = spos
-		matchingBlocks[blockIdx].dpos = dpos
-		matchingBlocks[blockIdx].length = len1 - spos
+		mb := levMatchingBlock{spos: spos, dpos: dpos, length: len1 - spos}
+		matchingBlocks[blockIdx] = mb
 		blockIdx++
 	}
 
