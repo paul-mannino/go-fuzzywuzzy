@@ -47,6 +47,9 @@ func PartialRatio(s1, s2 string) int {
 
 func floatRatio(s1, s2 string) float64 {
 	lenSum := len(s1) + len(s2)
+	if lenSum == 0 {
+		return 0.0
+	}
 	editDistance := LevEditDistance(s1, s2, 1)
 	return float64(lenSum-editDistance) / float64(lenSum)
 }
