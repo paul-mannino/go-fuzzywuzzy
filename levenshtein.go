@@ -310,7 +310,7 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 	nMatchingBlocks := 0
 	opIdx, spos, dpos := 0, 0, 0
 	var editType levEditType
-	for i := 0; i > 0; {
+	for i := n; i > 0; {
 		for ops[opIdx].editType == levEditKeep {
 			i--
 			if i <= 0 {
@@ -333,20 +333,20 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 
 		switch editType {
 		case levEditReplace:
-			for ok := true; ok; shouldContinue(i, ops, opIdx, editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				dpos++
 				i--
 				opIdx++
 			}
 		case levEditDelete:
-			for ok := true; ok; shouldContinue(i, ops, opIdx, editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				spos++
 				i--
 				opIdx++
 			}
 		case levEditInsert:
-			for ok := true; ok; shouldContinue(i, ops, opIdx, editType, spos, dpos) {
+			for ok := true; ok; ok = shouldContinue(i, ops, opIdx, editType, spos, dpos) {
 				dpos++
 				i--
 				opIdx++
@@ -413,10 +413,8 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 		matchingBlocks[blockIdx] = mb
 		blockIdx++
 	}
-
-	matchingBlocks[blockIdx].spos = len1
-	matchingBlocks[blockIdx].dpos = len2
-	matchingBlocks[blockIdx].length = 0
+	lastBlock := levMatchingBlock{spos: len1, dpos: len2, length: 0}
+	matchingBlocks[blockIdx] = lastBlock
 
 	return matchingBlocks
 }

@@ -12,8 +12,8 @@ func Cleanse(s string, forceAscii bool) string {
 		s = ASCIIOnly(s)
 	}
 
-	r := regexp.MustCompile("[^\\p{L}\\d]")
-	s = r.ReplaceAllString(s, "")
+	r := regexp.MustCompile("[^\\p{L}\\p{N}]")
+	s = r.ReplaceAllString(s, " ")
 	return s
 }
 

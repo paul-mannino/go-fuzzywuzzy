@@ -12,8 +12,8 @@ var asciiOnlyData = [][]interface{}{
 
 var cleanseData = [][]interface{}{
 	{"  OnE ", "one", "one"},
-	{"Țw o", "țwo", "wo"},
-	{"ǩƱ©", "ǩʊ", ""},
+	{"Țw o", "țw o", "w o"},
+	{"ǩƱ©", "ǩʊ ", ""},
 }
 
 func TestASCIIOnly(t *testing.T) {
