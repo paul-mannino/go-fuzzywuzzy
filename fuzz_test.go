@@ -2,7 +2,7 @@ package fuzzy
 
 import "testing"
 
-var teams = []string{
+var games = []string{
 	"new york mets",                       //0
 	"new york mets",                       //1
 	"new YORK mets",                       //2
@@ -19,24 +19,24 @@ var nonascii = []string{
 }
 
 func TestRatio(t *testing.T) {
-	r1 := Ratio(teams[0], teams[1])
-	assertRatioIs100(t, "Ratio", teams[0], teams[1], r1)
+	r1 := Ratio(games[0], games[1])
+	assertRatioIs100(t, "Ratio", games[0], games[1], r1)
 
-	r2 := Ratio(teams[1], teams[2])
+	r2 := Ratio(games[1], games[2])
 	if r2 == 100 {
-		t.Errorf("Expected Ratio of '%v' and '%v' to be less than 100. Got %v", teams[1], teams[2], r2)
+		t.Errorf("Expected Ratio of '%v' and '%v' to be less than 100. Got %v", games[1], games[2], r2)
 	}
 
-	r3 := Ratio(Cleanse(teams[1], true), Cleanse(teams[2], true))
-	assertRatioIs100(t, "Ratio (cleansed)", teams[1], teams[2], r3)
+	r3 := Ratio(Cleanse(games[1], true), Cleanse(teams[2], true))
+	assertRatioIs100(t, "Ratio (cleansed)", games[1], games[2], r3)
 
 	r4 := Ratio("", "")
 	assertRatio(t, "Ratio", "[empty string]", "[empty string]", 0, r4)
 }
 
 func TestPartialRatio(t *testing.T) {
-	r1 := PartialRatio(teams[1], teams[3])
-	assertRatioIs100(t, "PartialRatio", teams[1], teams[3], r1)
+	r1 := PartialRatio(games[1], games[3])
+	assertRatioIs100(t, "PartialRatio", games[1], games[3], r1)
 
 	r2 := PartialRatio("", "")
 	assertRatio(t, "PartialRatio", "[empty string]", "[empty string]", 0, r2)
@@ -60,45 +60,49 @@ func TestPartialRatio(t *testing.T) {
 }
 
 func TestTokenSortRatio(t *testing.T) {
-	r1 := PartialRatio(teams[1], teams[0])
-	assertRatioIs100(t, "TokenSortRatio", teams[1], teams[0], r1)
+	r1 := PartialRatio(games[1], games[0])
+	assertRatioIs100(t, "TokenSortRatio", games[1], games[0], r1)
 }
 
 func TestPartialTokenSortRatio(t *testing.T) {
-	r1 := PartialTokenSortRatio(teams[0], teams[1], false, false)
-	assertRatioIs100(t, "PartialTokenSortRatio", teams[0], teams[1], r1)
-	r2 := PartialTokenSortRatio(teams[4], teams[5], false, false)
-	assertRatioIs100(t, "PartialTokenSortRatio", teams[4], teams[5], r2)
+	r1 := PartialTokenSortRatio(games[0], games[1], false, false)
+	assertRatioIs100(t, "PartialTokenSortRatio", games[0], games[1], r1)
+	r2 := PartialTokenSortRatio(games[4], games[5], false, false)
+	assertRatioIs100(t, "PartialTokenSortRatio", games[4], games[5], r2)
 }
 
 func TestTokenSetRatio(t *testing.T) {
-	r1 := TokenSetRatio(teams[4], teams[5], false, false)
-	assertRatioIs100(t, "TokenSetRatio", teams[4], teams[5], r1)
+	r1 := TokenSetRatio(games[4], games[5], false, false)
+	assertRatioIs100(t, "TokenSetRatio", games[4], games[5], r1)
 }
 
 func TestPartialTokenSetRatio(t *testing.T) {
-	r1 := PartialTokenSetRatio(teams[4], teams[7], false, false)
-	assertRatioIs100(t, "PartialTokenSetRatio", teams[4], teams[7], r1)
+	r1 := PartialTokenSetRatio(games[4], games[7], false, false)
+	assertRatioIs100(t, "PartialTokenSetRatio", games[4], games[7], r1)
 }
 
 func TestQuickRatio(t *testing.T) {
-	r1 := QRatio(teams[0], teams[1])
-	assertRatioIs100(t, "QRatio", teams[0], teams[1], r1)
-	r2 := QRatio(teams[0], teams[2])
-	assertRatioIs100(t, "QRatio", teams[0], teams[2], r2)
-	r3 := QRatio(teams[0], teams[3])
-	assertRatioIsNot100(t, "QRatio", teams[0], teams[3], r3)
+	r1 := QRatio(games[0], games[1])
+	assertRatioIs100(t, "QRatio", games[0], games[1], r1)
+	r2 := QRatio(games[0], games[2])
+	assertRatioIs100(t, "QRatio", games[0], games[2], r2)
+	r3 := QRatio(games[0], games[3])
+	assertRatioIsNot100(t, "QRatio", games[0], games[3], r3)
+
+	s1, s2 := "XYZ", "XYZÜ"
+	r4 := QRatio(s1, s2)
+	assertRatio(t, "QRatio", s1, s2, 100, r4)
 }
 
 func TestWRatio(t *testing.T) {
-	r1 := WRatio(teams[0], teams[1])
-	assertRatioIs100(t, "WRatio", teams[0], teams[1], r1)
-	r2 := WRatio(teams[0], teams[2])
-	assertRatioIs100(t, "WRatio", teams[0], teams[2], r2)
-	r3 := WRatio(teams[0], teams[3])
-	assertRatio(t, "WRatio", teams[0], teams[3], 90, r3)
-	r4 := WRatio(teams[4], teams[5])
-	assertRatio(t, "WRatio", teams[4], teams[5], 95, r4)
+	r1 := WRatio(games[0], games[1])
+	assertRatioIs100(t, "WRatio", games[0], games[1], r1)
+	r2 := WRatio(games[0], games[2])
+	assertRatioIs100(t, "WRatio", games[0], games[2], r2)
+	r3 := WRatio(games[0], games[3])
+	assertRatio(t, "WRatio", games[0], games[3], 90, r3)
+	r4 := WRatio(games[4], games[5])
+	assertRatio(t, "WRatio", games[4], games[5], 95, r4)
 
 	r5 := WRatio(nonascii[0], nonascii[1])
 	if r5 != 0 {

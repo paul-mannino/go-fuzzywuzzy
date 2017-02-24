@@ -2,9 +2,10 @@ package fuzzy
 
 import "testing"
 
-func TestExtractWithoutOrder(t *testing.T) {
-	p := func(s string) string {
-		return "f"
+func TestExtractOne(t *testing.T) {
+	query1 := "new york mets at atlanta braves"
+	best, _ := ExtractOne(query1, games)
+	if best.Match != "braves vs mets" {
+		t.Fatal()
 	}
-	ExtractWithoutOrder("test", []string{"test", "test"}, p)
 }
