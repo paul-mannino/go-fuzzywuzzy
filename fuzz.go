@@ -28,10 +28,13 @@ func PartialRatio(s1, s2 string) int {
 	bestScore := 0.0
 	for _, block := range matchingBlocks {
 		longStart := block.dpos - block.spos
-		if longStart <= 0 {
+		if longStart < 0 {
 			longStart = 0
 		}
 		longEnd := longStart + len(shorter)
+		if longEnd > len(longer) {
+			longEnd = len(longer)
+		}
 		longSubStr := string([]rune(longer)[longStart:longEnd])
 
 		r := floatRatio(shorter, longSubStr)
@@ -128,8 +131,8 @@ func weightedRatioHelper(s1, s2 string, asciiOnly bool) int {
 			unbaseScale * partialScale
 		return int(round(max(baseScore, partialScore, tokenSortScore, tokenSetScore)))
 	}
-	tokenSortScore := float64(PartialTokenSortRatio(c1, c2, asciiOnly, false)) * unbaseScale
-	tokenSetScore := float64(PartialTokenSetRatio(c1, c2, asciiOnly, false)) * unbaseScale
+	tokenSortScore := float64(TokenSortRatio(c1, c2, asciiOnly, false)) * unbaseScale
+	tokenSetScore := float64(TokenSetRatio(c1, c2, asciiOnly, false)) * unbaseScale
 	return int(round(max(baseScore, tokenSortScore, tokenSetScore)))
 }
 

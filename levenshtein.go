@@ -285,8 +285,6 @@ func editOpsToOpCodes(ops []levEditOp, len1, len2 int) []levOpCode {
 		opCodes[codeIdx].dbeg = dpos
 		opCodes[codeIdx].send = len1
 		opCodes[codeIdx].dend = len2
-
-		codeIdx++
 	}
 
 	return opCodes
@@ -363,7 +361,6 @@ func getMatchingBlocksHelper(len1, len2 int, ops []levEditOp) []levMatchingBlock
 	opIdx = 0
 	spos, dpos = 0, 0
 	blockIdx := 0
-	editType = levEditKeep
 	for i := n; i > 0; {
 		for ops[opIdx].editType == levEditKeep {
 			i--
@@ -472,6 +469,12 @@ func getMatchingBlocksFromOpCodes(len1, len2 int, ops []levOpCode) []levMatching
 	return matchingBlocks
 }
 
+// EditDistance omputes the Levenshtein distance between two strings,
+// weighting replacements the same as insertions and deletions.
+func EditDistance(s1, s2 string) int {
+	return LevEditDistance(s1, s2, 1)
+}
+
 // LevEditDistance computes Levenshtein distance between 2 strings
 func LevEditDistance(s1, s2 string, xcost int) int {
 	chrs1, chrs2 := []rune(s1), []rune(s2)
@@ -510,9 +513,8 @@ func levEditDistance(chrs1 []rune, len1 int, chrs2 []rune, len2 int, xcost int) 
 	if len1 == 1 {
 		if xcost != 0 {
 			return len2 + 1 - 2*runeContained(chrs1[idx1], chrs2)
-		} else {
-			return len2 - runeContained(chrs1[idx1], chrs2)
 		}
+		return len2 - runeContained(chrs1[idx1], chrs2)
 	}
 
 	len1++
@@ -633,9 +635,8 @@ func levEditDistance(chrs1 []rune, len1 int, chrs2 []rune, len2 int, xcost int) 
 func runeContained(a rune, list []rune) int {
 	if indexOfRune(a, list) >= 0 {
 		return 1
-	} else {
-		return 0
 	}
+	return 0
 }
 
 func indexOfRune(a rune, list []rune) int {

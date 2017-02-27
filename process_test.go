@@ -26,11 +26,21 @@ func TestExtractOne(t *testing.T) {
 
 	query4 := "chicago cubs vs new york mets"
 	best4, _ := ExtractOne(query4, baseballStrings)
-	assertMatch(t, query4, baseballStrings[0], best4)
+	assertMatch(t, query4, baseballStrings[0], best4.Match)
+
+	query5 := "new york mets at chicago cubs"
+	best5, _ := ExtractOne(query5, baseballStrings)
+	assertMatch(t, query5, baseballStrings[0], best5.Match)
+
+	customScorer := func(s1, s2 string) int {
+		return QRatio(s1, s2)
+	}
+	best6, _ := ExtractOne(query5, baseballStrings, customScorer)
+	assertMatch(t, query5, baseballStrings[0], best6.Match)
 }
 
 func assertMatch(t *testing.T, query, expectedMatch, actualMatch string) {
 	if expectedMatch != actualMatch {
-		t.Errorf("Expecting %v to find match of %v. Actual match: %v", query, expectedMatch, actualMatch)
+		t.Errorf("Expecting [%v] to find match of [%v]. Actual match: [%v]", query, expectedMatch, actualMatch)
 	}
 }

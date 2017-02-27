@@ -27,7 +27,7 @@ func TestRatio(t *testing.T) {
 		t.Errorf("Expected Ratio of '%v' and '%v' to be less than 100. Got %v", games[1], games[2], r2)
 	}
 
-	r3 := Ratio(Cleanse(games[1], true), Cleanse(teams[2], true))
+	r3 := Ratio(Cleanse(games[1], true), Cleanse(games[2], true))
 	assertRatioIs100(t, "Ratio (cleansed)", games[1], games[2], r3)
 
 	r4 := Ratio("", "")
