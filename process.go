@@ -2,6 +2,7 @@ package fuzzy
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 )
 
@@ -65,7 +66,11 @@ func ExtractWithoutOrder(query string, choices []string, args ...interface{}) (M
 	}
 	scoreCutoff := 0
 
-	opts, _ := parseArgs(args)
+	opts, err := parseArgs(args...)
+	if err != nil {
+		return nil, err
+	}
+
 	if opts.scorerSet {
 		scorer = opts.scorer
 	}
@@ -103,14 +108,16 @@ func parseArgs(args ...interface{}) (*optionalArgs, error) {
 	processorSet, scorerSet, cutoffSet := false, false, false
 
 	for _, arg := range args {
-		switch arg.(type) {
+		switch v := arg.(type) {
+		default:
+			return nil, fmt.Errorf("not expecting optional argument of type %T", v)
 		case func(string) string:
 			if processorSet {
 				return nil, errors.New("expecting only one processing function of the form f(string)->string")
 			}
 			processor = arg.(func(string) string)
 			processorSet = true
-		case func(string) int:
+		case func(string, string) int:
 			if scorerSet {
 				return nil, errors.New("expecting only one scoring function of the form f(string,string)->int")
 			}
@@ -121,7 +128,9 @@ func parseArgs(args ...interface{}) (*optionalArgs, error) {
 				return nil, errors.New("expecting only one integer scoring cutoff")
 			}
 			scoreCutoff = arg.(int)
+			cutoffSet = true
 		}
+
 	}
 	opts := new(optionalArgs)
 	opts.processor = processor
@@ -134,7 +143,7 @@ func parseArgs(args ...interface{}) (*optionalArgs, error) {
 }
 
 func Extract(query string, choices []string, limit int, args ...interface{}) (MatchPairs, error) {
-	pairs, err := ExtractWithoutOrder(query, choices, args)
+	pairs, err := ExtractWithoutOrder(query, choices, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +152,7 @@ func Extract(query string, choices []string, limit int, args ...interface{}) (Ma
 }
 
 func ExtractOne(query string, choices []string, args ...interface{}) (*MatchPair, error) {
-	matches, err := ExtractWithoutOrder(query, choices, args)
+	matches, err := ExtractWithoutOrder(query, choices, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +212,7 @@ func Dedupe(sliceWithDupes []string, args ...interface{}) ([]string, error) {
 		case 1:
 			s, err := arg.(func(string, string) int)
 			if err {
-				return nil, errors.New("Expected second optional argument to be a function of the form f(string,string)->int")
+				return nil, errors.New("expected second optional argument to be a function of the form f(string,string)->int")
 			}
 			scorer = s
 		}
