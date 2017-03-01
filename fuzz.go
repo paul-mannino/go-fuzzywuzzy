@@ -148,17 +148,27 @@ func max(args ...float64) float64 {
 
 // TokenSortRatio computes a score similar to Ratio, except tokens
 // are sorted and (optionally) cleansed prior to comparison.
-func TokenSortRatio(s1, s2 string, asciiOnly, cleanse bool) int {
-	return tokenSortRatioHelper(s1, s2, false, asciiOnly, cleanse)
+func TokenSortRatio(s1, s2 string, opts ...bool) int {
+	return tokenSortRatioHelper(s1, s2, false, opts...)
 }
 
 // PartialTokenSortRatio computes a score similar to PartialRatio, except tokens
 // are sorted and (optionally) cleansed prior to comparison.
-func PartialTokenSortRatio(s1, s2 string, asciiOnly, cleanse bool) int {
-	return tokenSortRatioHelper(s1, s2, true, asciiOnly, cleanse)
+func PartialTokenSortRatio(s1, s2 string, opts ...bool) int {
+	return tokenSortRatioHelper(s1, s2, true, opts...)
 }
 
-func tokenSortRatioHelper(s1, s2 string, partial, asciiOnly, cleanse bool) int {
+func tokenSortRatioHelper(s1, s2 string, partial bool, opts ...bool) int {
+	asciiOnly, cleanse := false, false
+	for i, val := range opts {
+		switch i {
+		case 0:
+			asciiOnly = val
+		case 1:
+			cleanse = val
+		}
+	}
+
 	sorted1 := tokenSort(s1, asciiOnly, cleanse)
 	sorted2 := tokenSort(s2, asciiOnly, cleanse)
 
@@ -184,19 +194,29 @@ func tokenSort(s string, asciiOnly, cleanse bool) string {
 // them to a set, construct strings of the form
 // <sorted intersection><sorted remainder>, takes the ratios
 // of those two strings, and returns the max.
-func TokenSetRatio(s1, s2 string, asciiOnly, cleanse bool) int {
-	return tokenSetRatioHelper(s1, s2, false, asciiOnly, cleanse)
+func TokenSetRatio(s1, s2 string, opts ...bool) int {
+	return tokenSetRatioHelper(s1, s2, false, opts...)
 }
 
 // PartialTokenSetRatio extracts tokens from each input string, adds
 // them to a set, construct two strings of the form
 // <sorted intersection><sorted remainder>, takes the partial ratios
 // of those two strings, and returns the max.
-func PartialTokenSetRatio(s1, s2 string, asciiOnly, cleanse bool) int {
-	return tokenSetRatioHelper(s1, s2, true, asciiOnly, cleanse)
+func PartialTokenSetRatio(s1, s2 string, opts ...bool) int {
+	return tokenSetRatioHelper(s1, s2, true, opts...)
 }
 
-func tokenSetRatioHelper(s1, s2 string, partial, asciiOnly, cleanse bool) int {
+func tokenSetRatioHelper(s1, s2 string, partial bool, opts ...bool) int {
+	asciiOnly, cleanse := false, false
+	for i, val := range opts {
+		switch i {
+		case 0:
+			asciiOnly = val
+		case 1:
+			cleanse = val
+		}
+	}
+
 	if cleanse {
 		s1 = Cleanse(s1, asciiOnly)
 		s2 = Cleanse(s2, asciiOnly)

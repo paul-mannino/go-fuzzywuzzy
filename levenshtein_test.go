@@ -1,8 +1,6 @@
 package fuzzy
 
-import (
-	"testing"
-)
+import "testing"
 
 var levEditDistanceTestData = [][]interface{}{
 	{"one", "", 3},
