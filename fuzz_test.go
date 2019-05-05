@@ -139,6 +139,26 @@ func TestUQRatio(t *testing.T) {
 	}
 }
 
+func TestReadmeExamples(t *testing.T) {
+	s1 := "coolstring"
+	s2 := "coooolstring"
+	assertRatio(t, "Ratio", s1, s2, 91, Ratio(s1, s2))
+
+	s1 = "coolstring"
+	s2 = "radstring"
+	assertRatio(t, "Ratio", s1, s2, 63, Ratio(s1, s2))
+
+	s1 = "needle"
+	s2 = "haystackneedelhaystack"
+	assertRatio(t, "Ratio", s1, s2, 36, Ratio(s1, s2))
+	assertRatio(t, "PartialRatio", s1, s2, 83, PartialRatio(s1, s2))
+
+	s1 = "several tokens arbitrary order"
+	s2 = "order arbitrary several tokens"
+	assertRatio(t, "Ratio", s1, s2, 50, Ratio(s1, s2))
+	assertRatio(t, "TokenSortRatio", s1, s2, 100, TokenSortRatio(s1, s2))
+}
+
 func assertRatio(t *testing.T, methodName, s1, s2 string, expectedRatio, actualRatio int) {
 	if actualRatio != expectedRatio {
 		t.Errorf("Expected %v of %v and %v to be %v. Got %v", methodName, s1, s2, expectedRatio, actualRatio)
