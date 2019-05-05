@@ -13,6 +13,11 @@ var games = []string{
 	"new york city mets - atlanta braves", //7
 }
 
+var alphanumeric = []string{
+	"JOHNSMITH6211986",                    //0
+	"JOHNSMITH6201986",                    //1
+}
+
 var nonascii = []string{
 	"你貴姓大名？",  //0
 	"你叫什麼名字？", //1
@@ -32,6 +37,9 @@ func TestRatio(t *testing.T) {
 
 	r4 := Ratio("", "")
 	assertRatio(t, "Ratio", "[empty string]", "[empty string]", 0, r4)
+
+	r5 := Ratio(alphanumeric[0], alphanumeric[1])
+	assertRatio(t, "Ratio", alphanumeric[0], alphanumeric[1], 94, r5)
 }
 
 func TestPartialRatio(t *testing.T) {

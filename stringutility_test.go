@@ -8,12 +8,14 @@ var asciiOnlyData = [][]interface{}{
 	{"one", "one"},
 	{"Țwo", "wo"},
 	{"ǩƱ©", ""},
+	{"123ABC", "123ABC"},
 }
 
 var cleanseData = [][]interface{}{
 	{"  OnE ", "one", "one"},
 	{"Țw o", "țw o", "w o"},
 	{"ǩƱ©", "ǩʊ ", ""},
+	{"ABC123", "abc123", "abc123"},
 }
 
 func TestASCIIOnly(t *testing.T) {

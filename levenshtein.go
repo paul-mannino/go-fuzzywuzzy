@@ -475,27 +475,28 @@ func EditDistance(s1, s2 string) int {
 	return LevEditDistance(s1, s2, 0)
 }
 
-// LevEditDistance computes Levenshtein distance between 2 strings
+// LevEditDistance computes Levenshtein distance between 2 strings.
+// If xcost parameter is zero, the replace operation has weight 1.
+// Otherwise, all edit operations have equal weights of 1.
 func LevEditDistance(s1, s2 string, xcost int) int {
 	chrs1, chrs2 := []rune(s1), []rune(s2)
-	len1, len2 := len(chrs1), len(chrs2)
-	return levEditDistance(chrs1, len1, chrs2, len2, xcost)
+	return optimizedEditDistance(chrs1, chrs2, xcost)
 }
 
-func levEditDistance(chrs1 []rune, len1 int, chrs2 []rune, len2 int, xcost int) int {
-	idx1, idx2 := 0, 0
-	// strip common prefix
-	for len1 > 0 && len2 > 0 && chrs1[idx1] == chrs2[idx2] {
-		len1--
-		len2--
-		idx1++
-		idx2++
+func optimizedEditDistance(chrs1, chrs2 []rune, xcost int) int {
+	maxIdx := min(len(chrs1), len(chrs2))
+	for i := 0; i < maxIdx; i++ {
+		if chrs1[i] != chrs2[i] {
+			return editDistance(chrs1[i:], chrs2[i:], xcost)
+		}
 	}
-	// strip suffix
-	for len1 > 0 && len2 > 0 && chrs1[idx1+len1-1] == chrs2[idx2+len2-1] {
-		len1--
-		len2--
-	}
+
+	return editDistance(chrs1[maxIdx:], chrs2[maxIdx:], xcost)
+}
+
+func editDistance(chrs1, chrs2 []rune, xcost int) int {
+	len1 := len(chrs1)
+	len2 := len(chrs2)
 
 	if len1 == 0 {
 		return len2
@@ -503,147 +504,41 @@ func levEditDistance(chrs1 []rune, len1 int, chrs2 []rune, len2 int, xcost int) 
 	if len2 == 0 {
 		return len1
 	}
-	// if s1 is longer than s2, switch them around
-	if len1 > len2 {
-		idx1, idx2 = idx2, idx1
-		len1, len2 = len2, len1
-		chrs1, chrs2 = chrs2, chrs1
+	
+	editMatrix := make([][]int, len1 + 1)
+	for i := range editMatrix {
+		editMatrix[i] = make([]int, len2 + 1)
 	}
 
-	if len1 == 1 {
-		if xcost != 0 {
-			return len2 + 1 - 2*runeContained(chrs1[idx1], chrs2)
-		}
-		return len2 - runeContained(chrs1[idx1], chrs2)
+	for i := range editMatrix {
+		editMatrix[i][0] = i
 	}
 
-	len1++
-	len2++
-	half := len1 >> 1
+	for j := range editMatrix[0] {
+		editMatrix[0][j] = j
+	}
 
-	var row = make([]int, len2)
-	end := len2 - 1
-	tmp := 0
+	replaceCost := 2
 	if xcost == 0 {
-		tmp = half
+		replaceCost = 1
 	}
 
-	for i := 0; i < len2-tmp; i++ {
-		row[i] = i
-	}
-
-	if xcost != 0 {
-		for i := 1; i < len1; i++ {
-			p := 1
-
-			char1 := chrs1[idx1+i-1]
-			c2p := idx2
-			D, x := i, i
-
-			for p <= end {
-				if char1 == chrs2[c2p] {
-					D--
-					x = D
-				} else {
-					x++
-				}
-				c2p++
-				D = row[p]
-				D++
-
-				if x > D {
-					x = D
-				}
-				row[p] = x
-				p++
-			}
-		}
-	} else {
-		row[0] = len1 - half - 1
-		for i := 1; i < len1; i++ {
-			var c2p, D, x, p int
-			char1 := chrs1[idx1+i-1]
-			if i >= len1-half {
-				offset := i - (len1 - half)
-				c2p = idx2 + offset
-				p = offset
-				loc := 1
-				if char1 == chrs2[c2p] {
-					loc = 0
-				}
-				c3 := row[p] + loc
-				p++
-				c2p++
-				x = row[p]
-				x++
-				D = x
-				if x > c3 {
-					x = c3
-				}
-				row[p] = x
-				p++
+	for i, c1 := range chrs1 {
+		for j, c2 := range chrs2 {
+			editMatrix[i+1][j+1] = 1 + min(editMatrix[i][j+1], editMatrix[i+1][j])
+			if c1 == c2 {
+				editMatrix[i+1][j+1] = min(editMatrix[i][j], editMatrix[i+1][j+1])
 			} else {
-				p = 1
-				c2p = idx2
-				x, D = i, i
-			}
-
-			if i <= half+1 {
-				end = len2 + i - half - 2
-			}
-
-			for p <= end {
-				D--
-				tmp := 1
-				if char1 == chrs2[c2p] {
-					tmp = 0
-				}
-				c2p++
-				c3 := D + tmp
-				x++
-				if x > c3 {
-					x = c3
-				}
-				D = row[p]
-				D++
-				if x > D {
-					x = D
-				}
-				row[p] = x
-				p++
-			}
-
-			if i <= half {
-				D--
-				loc := 1
-				if char1 == chrs2[c2p] {
-					loc = 0
-				}
-				x++
-				c3 := D + loc
-				if x > c3 {
-					x = c3
-				}
-				row[p] = x
+				editMatrix[i+1][j+1] = min(editMatrix[i][j] + replaceCost, editMatrix[i+1][j+1])
 			}
 		}
 	}
-
-	return row[end]
+	return editMatrix[len1][len2]
 }
 
-func runeContained(a rune, list []rune) int {
-	if indexOfRune(a, list) >= 0 {
-		return 1
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	return 0
-}
-
-func indexOfRune(a rune, list []rune) int {
-	for idx, b := range list {
-		if b == a {
-			return idx
-		}
-	}
-	return -1
+	return b
 }

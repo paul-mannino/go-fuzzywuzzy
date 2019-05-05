@@ -4,10 +4,12 @@ import "testing"
 
 var levEditDistanceTestData = [][]interface{}{
 	{"one", "", 3},
+	{"", "qwertuiop", 9},
 	{"four", "tour", 1},
 	{"cupid", "pulpit", 3},
 	{"no", "y", 2},
 	{"nowish", "n", 5},
+	{"JOHNSMITH6211986", "JOHNSMITH6201986", 1},
 }
 
 func TestLevEditDistance(t *testing.T) {

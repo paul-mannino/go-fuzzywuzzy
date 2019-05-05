@@ -1,5 +1,5 @@
 # go-fuzzywuzzy
-This is a port of SeatGeek's [fuzzywuzzy](https://github.com/seatgeek/fuzzywuzzy), a fuzzy string matching library. Also included is a port of [python-levenshtein](https://github.com/miohtama/python-Levenshtein), a wicked-fast implementation of Levenshtein edit distance.
+This is a port of SeatGeek's [fuzzywuzzy](https://github.com/seatgeek/fuzzywuzzy), a fuzzy string matching library. 
 ## Usage 
 ### Levenshtein Edit Distance
 ```go
