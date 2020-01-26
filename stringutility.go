@@ -1,32 +1,31 @@
 package fuzzy
 
 import (
-	"regexp"
 	"strings"
+	"unicode"
 )
 
-func Cleanse(s string, forceAscii bool) string {
-	s = strings.TrimSpace(s)
-	s = strings.ToLower(s)
-	if forceAscii {
+func Cleanse(s string, forceASCII bool) string {
+	if forceASCII {
 		s = ASCIIOnly(s)
 	}
-
-	r := regexp.MustCompile("[^\\p{L}\\p{N}]")
-	s = r.ReplaceAllString(s, " ")
-	return s
+	s = strings.TrimSpace(s)
+	rs := make([]rune, 0, len(s))
+	for _, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			r = ' '
+		}
+		rs = append(rs, r)
+	}
+	return strings.ToLower(string(rs))
 }
 
 func ASCIIOnly(s string) string {
-	runes := []rune(s)
-	stripped := make([]rune, len(runes))
-
-	w := 0
-	for _, r := range runes {
-		if r < 128 {
-			stripped[w] = r
-			w++
+	b := make([]byte, 0, len(s))
+	for _, r := range s {
+		if r <= unicode.MaxASCII {
+			b = append(b, byte(r))
 		}
 	}
-	return string(stripped[0:w])
+	return string(b)
 }

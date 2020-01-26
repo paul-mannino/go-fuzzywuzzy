@@ -7,6 +7,7 @@ import (
 var asciiOnlyData = [][]interface{}{
 	{"one", "one"},
 	{"Țwo", "wo"},
+	{"three three!", "three three!"},
 	{"ǩƱ©", ""},
 	{"123ABC", "123ABC"},
 }
