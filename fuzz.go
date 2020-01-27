@@ -4,6 +4,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 // Ratio computes a score of how close two unicode strings are
@@ -11,7 +12,7 @@ import (
 // Returns an integer score [0,100], higher score indicates
 // that strings are closer.
 func Ratio(s1, s2 string) int {
-	return int(round(100 * floatRatio(s1, s2)))
+	return int(round(100 * floatRatio([]rune(s1), []rune(s2))))
 }
 
 // PartialRatio computes a score of how close a string is with
@@ -20,11 +21,12 @@ func Ratio(s1, s2 string) int {
 // Returns an integer score [0,100], higher score indicates
 // that the string and substring are closer.
 func PartialRatio(s1, s2 string) int {
-	shorter, longer := s1, s2
-	if len(s1) > len(s2) {
-		longer, shorter = s1, s2
+	shorter, longer := []rune(s1), []rune(s2)
+	if len(shorter) > len(longer) {
+		longer, shorter = shorter, longer
 	}
 	matchingBlocks := getMatchingBlocks(shorter, longer)
+
 	bestScore := 0.0
 	for _, block := range matchingBlocks {
 		longStart := block.dpos - block.spos
@@ -35,7 +37,7 @@ func PartialRatio(s1, s2 string) int {
 		if longEnd > len(longer) {
 			longEnd = len(longer)
 		}
-		longSubStr := string([]rune(longer)[longStart:longEnd])
+		longSubStr := longer[longStart:longEnd]
 
 		r := floatRatio(shorter, longSubStr)
 		if r > .995 {
@@ -48,12 +50,12 @@ func PartialRatio(s1, s2 string) int {
 	return int(round(100 * bestScore))
 }
 
-func floatRatio(s1, s2 string) float64 {
-	lenSum := len(s1) + len(s2)
+func floatRatio(chrs1, chrs2 []rune) float64 {
+	lenSum := len(chrs1) + len(chrs2)
 	if lenSum == 0 {
 		return 0.0
 	}
-	editDistance := LevEditDistance(s1, s2, 1)
+	editDistance := optimizedEditDistance(chrs1, chrs2, 1)
 	return float64(lenSum-editDistance) / float64(lenSum)
 }
 
@@ -109,7 +111,7 @@ func weightedRatioHelper(s1, s2 string, asciiOnly bool) int {
 	unbaseScale := .95
 	partialScale := .9
 	baseScore := float64(Ratio(c1, c2))
-	lengthRatio := float64(len(c1)) / float64(len(c2))
+	lengthRatio := float64(utf8.RuneCountInString(c1)) / float64(utf8.RuneCountInString(c2))
 	if lengthRatio < 1 {
 		lengthRatio = 1 / lengthRatio
 	}
