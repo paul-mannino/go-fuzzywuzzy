@@ -14,8 +14,8 @@ var games = []string{
 }
 
 var alphanumeric = []string{
-	"JOHNSMITH6211986",                    //0
-	"JOHNSMITH6201986",                    //1
+	"JOHNSMITH6211986", //0
+	"JOHNSMITH6201986", //1
 }
 
 var nonascii = []string{
@@ -65,6 +65,10 @@ func TestPartialRatio(t *testing.T) {
 	if r5 <= 75 {
 		t.Errorf("Expected Ratio of '%v' and '%v' to be greater than 75. Got %v", s1, s4, r5)
 	}
+
+	s5, s6 := "栶eeƵ画-ʏĜ橭畏p父«P^艎鹥ʭ攆", "eeǸɁ碳簫S晑=2#父«厄].稍咾靐Ë"
+	r6 := PartialRatio(s5, s6)
+	assertRatio(t, "Ratio", s5, s6, 21, r6)
 }
 
 func TestTokenSortRatio(t *testing.T) {

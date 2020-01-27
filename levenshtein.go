@@ -296,8 +296,7 @@ func shouldContinue(i int, editOps []levEditOp, opIdx int, editType levEditType,
 		editOps[opIdx].dpos == dpos && editOps[opIdx].spos == spos
 }
 
-func getMatchingBlocks(s1, s2 string) []levMatchingBlock {
-	chrs1, chrs2 := []rune(s1), []rune(s2)
+func getMatchingBlocks(chrs1, chrs2 []rune) []levMatchingBlock {
 	len1, len2 := len(chrs1), len(chrs2)
 
 	return getMatchingBlocksHelper(len1, len2, findEditOpsHelper(chrs1, len1, chrs2, len2))
@@ -504,10 +503,10 @@ func editDistance(chrs1, chrs2 []rune, xcost int) int {
 	if len2 == 0 {
 		return len1
 	}
-	
-	editMatrix := make([][]int, len1 + 1)
+
+	editMatrix := make([][]int, len1+1)
 	for i := range editMatrix {
-		editMatrix[i] = make([]int, len2 + 1)
+		editMatrix[i] = make([]int, len2+1)
 	}
 
 	for i := range editMatrix {
@@ -529,7 +528,7 @@ func editDistance(chrs1, chrs2 []rune, xcost int) int {
 			if c1 == c2 {
 				editMatrix[i+1][j+1] = min(editMatrix[i][j], editMatrix[i+1][j+1])
 			} else {
-				editMatrix[i+1][j+1] = min(editMatrix[i][j] + replaceCost, editMatrix[i+1][j+1])
+				editMatrix[i+1][j+1] = min(editMatrix[i][j]+replaceCost, editMatrix[i+1][j+1])
 			}
 		}
 	}
