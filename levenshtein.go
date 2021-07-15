@@ -468,7 +468,7 @@ func getMatchingBlocksFromOpCodes(len1, len2 int, ops []levOpCode) []levMatching
 	return matchingBlocks
 }
 
-// EditDistance omputes the Levenshtein distance between two strings,
+// EditDistance computes the Levenshtein distance between two strings,
 // weighting replacements the same as insertions and deletions.
 func EditDistance(s1, s2 string) int {
 	return LevEditDistance(s1, s2, 0)
