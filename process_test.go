@@ -29,6 +29,11 @@ var someEmptyStrings = []string{
 var someNullStrings = []string{}
 
 func TestExtractOne(t *testing.T) {
+	query0 := "你好呀"
+	choice0 := []string{"你好好", "您好呀", "您好么", "你好么"}
+	best0, _ := ExtractOne(query0, choice0)
+	assertMatch(t, query0, choice0[0], best0.Match)
+
 	query1 := "new york mets at atlanta braves"
 	best1, _ := ExtractOne(query1, baseballStrings)
 	assertMatch(t, query1, baseballStrings[3], best1.Match)
