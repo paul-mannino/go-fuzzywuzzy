@@ -1,6 +1,7 @@
 package fuzzy
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -97,15 +98,44 @@ func TestExtractOne(t *testing.T) {
 
 func TestDedupe(t *testing.T) {
 	sliceWithDupes := []string{"Frodo Baggins", "Tom Sawyer", "Bilbo Baggin", "Samuel L. Jackson", "F. Baggins", "Frody Baggins", "Bilbo Baggins"}
-	res, _ := Dedupe(sliceWithDupes)
+	res, err := Dedupe(sliceWithDupes, nil, nil)
+	assert.Nil(t, err)
 	if len(res) >= len(sliceWithDupes) {
 		t.Error("expecting Dedupe to remove at least one string from slice")
 	}
 
 	sliceWithoutDupes := []string{"Tom", "Dick", "Harry"}
-	res2, _ := Dedupe(sliceWithoutDupes)
+	res2, err := Dedupe(sliceWithoutDupes, nil, nil)
+	assert.Nil(t, err)
 	if len(res2) != len(sliceWithoutDupes) {
 		t.Error("not expecting Dedupe to remove any strings from slice")
+	}
+
+	lowThreshold := 1
+	res3, err := Dedupe(sliceWithDupes, &lowThreshold, nil)
+	assert.Nil(t, err)
+	if len(res3) != 1 {
+		t.Error("expecting low threshold to dedupe all items")
+	}
+
+	highThreshold := 99
+	res4, err := Dedupe(sliceWithDupes, &highThreshold, nil)
+	assert.Nil(t, err)
+	if len(res4) != len(sliceWithDupes) {
+		t.Error("expecting high threshold to maintain all items")
+	}
+
+	threshold := 1
+	res5, err := Dedupe(sliceWithDupes, &threshold, func(s1 string, s2 string) int {
+		diff := len(s1) - len(s2)
+		if diff < 0 {
+			diff *= -1
+		}
+		return diff
+	})
+	assert.Nil(t, err)
+	if len(res5) != 2 {
+		t.Error("expecting custom scorer to yield two results")
 	}
 }
 

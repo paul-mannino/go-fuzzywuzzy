@@ -220,7 +220,7 @@ func Dedupe(sliceWithDupes []string, threshold *int, scorer func(string, string)
 		}
 		if len(filtered) == 1 {
 			extracted = append(extracted, filtered[0].Match)
-		} else {
+		} else if len(filtered) > 0 {
 			altPoints := alphaLengthSortPairs(filtered)
 			sort.Sort(altPoints)
 			extracted = append(extracted, altPoints[0].Match)
