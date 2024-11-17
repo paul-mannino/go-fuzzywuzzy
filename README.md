@@ -1,4 +1,6 @@
 # go-fuzzywuzzy
+Please note: This repository is not actively maintained. I no longer use Go in my daily work, and will be slow to make updates. SeatGeek's library has evolved quite a bit since this port was written, so you may find that some behavior is absent from this library.
+
 This is a port of SeatGeek's [fuzzywuzzy](https://github.com/seatgeek/fuzzywuzzy), a fuzzy string matching library. 
 ## Usage 
 ### Levenshtein Edit Distance
