@@ -194,28 +194,16 @@ func largestKMatchPairs(pairs MatchPairs, k int) MatchPairs {
 	return make(MatchPairs, 0)
 }
 
-func Dedupe(sliceWithDupes []string, args ...interface{}) ([]string, error) {
-	var scorer func(string, string) int
-	scorer = func(s1, s2 string) int {
-		return TokenSetRatio(s1, s2, true, true)
-	}
-	threshold := 70
+var defaultThreshold = 70
 
-	for i, arg := range args {
-		switch i {
-		case 0:
-			t, err := arg.(int)
-			if err {
-				return nil, errors.New("expected first optional argument to be an integer")
-			}
-			threshold = t
-		case 1:
-			s, err := arg.(func(string, string) int)
-			if err {
-				return nil, errors.New("expected second optional argument to be a function of the form f(string,string)->int")
-			}
-			scorer = s
+func Dedupe(sliceWithDupes []string, threshold *int, scorer func(string, string) int) ([]string, error) {
+	if scorer == nil {
+		scorer = func(s1, s2 string) int {
+			return TokenSetRatio(s1, s2, true, true)
 		}
+	}
+	if threshold == nil {
+		threshold = &defaultThreshold
 	}
 
 	extracted := []string{}
@@ -226,13 +214,13 @@ func Dedupe(sliceWithDupes []string, args ...interface{}) ([]string, error) {
 		}
 		filtered := MatchPairs{}
 		for _, m := range matches {
-			if m.Score > threshold {
+			if m.Score > *threshold {
 				filtered = append(filtered, m)
 			}
 		}
 		if len(filtered) == 1 {
 			extracted = append(extracted, filtered[0].Match)
-		} else {
+		} else if len(filtered) > 0 {
 			altPoints := alphaLengthSortPairs(filtered)
 			sort.Sort(altPoints)
 			extracted = append(extracted, altPoints[0].Match)
