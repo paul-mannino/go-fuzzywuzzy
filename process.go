@@ -62,7 +62,7 @@ func ExtractWithoutOrder(query string, choices []string, args ...interface{}) (M
 		return Cleanse(s, false)
 	}
 	scorer := func(s1, s2 string) int {
-		return WRatio(s1, s2)
+		return UWRatio(s1, s2)
 	}
 	scoreCutoff := 0
 
